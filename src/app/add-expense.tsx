@@ -36,8 +36,13 @@ export default function AddExpense() {
             return;
           }
 
-          alert("Expense saved!");
-          router.replace("/");
+          router.replace({
+            pathname: "/",
+            params: {
+              name: description,
+              amount: amount,
+            },
+          });
         }}
       >
         <Text style={styles.saveButtonText}>Save Expense</Text>

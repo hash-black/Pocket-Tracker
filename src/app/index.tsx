@@ -1,7 +1,38 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  const params = useLocalSearchParams();
+  const [expenses, setExpenses] = useState([
+    {
+      name: "Lunch",
+      amount: 100,
+    },
+    {
+      name: "Fare",
+      amount: 40,
+    },
+    {
+      name: "School Supplies",
+      amount: 250,
+    },
+  ]);
+  if (params.name && params.amount) {
+    setExpenses((currentExpenses) => [
+      ...currentExpenses,
+      {
+        name: params.name as string,
+        amount: Number(params.amount),
+      },
+    ]);
+  }
+  const totalExpenses = expenses.reduce(
+    (total, expense) => total + expense.amount,
+    0,
+  );
+  const totalIncome = 1000;
+  const balance = totalIncome - totalExpenses;
   return (
     <View style={styles.container}>
       <Text style={styles.title}>PocketTrack</Text>
@@ -10,18 +41,18 @@ export default function Index() {
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text style={styles.balance}>₱0,00</Text>
+        <Text style={styles.balance}>₱{balance}.00</Text>
       </View>
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Income</Text>
-          <Text style={styles.income}>₱0,00</Text>
+          <Text style={styles.income}>₱{totalIncome}.00</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Expenses</Text>
-          <Text style={styles.expense}>₱0,00</Text>
+          <Text style={styles.expense}>₱{totalExpenses}</Text>
         </View>
       </View>
 
@@ -34,20 +65,13 @@ export default function Index() {
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
-      <View style={styles.transaction}>
-        <Text style={styles.transactionName}>🍔 Lunch</Text>
-        <Text style={styles.transactionAmount}>-₱100</Text>
-      </View>
+      {expenses.map((expense, index) => (
+        <View style={styles.transaction} key={index}>
+          <Text style={styles.transactionName}>{expense.name}</Text>
 
-      <View style={styles.transaction}>
-        <Text style={styles.transactionName}>🚌 Fare</Text>
-        <Text style={styles.transactionAmount}>-₱40</Text>
-      </View>
-
-      <View style={styles.transaction}>
-        <Text style={styles.transactionName}>📚 School Supplies</Text>
-        <Text style={styles.transactionAmount}>-₱250</Text>
-      </View>
+          <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
+        </View>
+      ))}
     </View>
   );
 }
