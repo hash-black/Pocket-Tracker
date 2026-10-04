@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -27,7 +28,18 @@ export default function AddExpense() {
         onChangeText={setAmount}
       />
 
-      <Pressable style={styles.saveButton}>
+      <Pressable
+        style={styles.saveButton}
+        onPress={() => {
+          if (!description || !amount) {
+            alert("Please fill in all fields.");
+            return;
+          }
+
+          alert("Expense saved!");
+          router.replace("/");
+        }}
+      >
         <Text style={styles.saveButtonText}>Save Expense</Text>
       </Pressable>
     </View>
