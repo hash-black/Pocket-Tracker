@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   return (
@@ -9,20 +10,27 @@ export default function Index() {
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text style={styles.balance}>₱0,450.00</Text>
+        <Text style={styles.balance}>₱0,00</Text>
       </View>
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Income</Text>
-          <Text style={styles.income}>₱0,000</Text>
+          <Text style={styles.income}>₱0,00</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Expenses</Text>
-          <Text style={styles.expense}>₱0,550</Text>
+          <Text style={styles.expense}>₱0,00</Text>
         </View>
       </View>
+
+      <Pressable
+        style={styles.addButton}
+        onPress={() => router.push("/add-expense")}
+      >
+        <Text style={styles.addButtonText}>+ Add Expense</Text>
+      </Pressable>
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
@@ -54,6 +62,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "bold",
+    alignContent: "center",
   },
 
   subtitle: {
@@ -127,6 +136,19 @@ const styles = StyleSheet.create({
   },
 
   transactionAmount: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  addButton: {
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: "#222222",
+    alignItems: "center",
+  },
+
+  addButtonText: {
+    color: "white",
     fontSize: 16,
     fontWeight: "bold",
   },
