@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Pressable,
@@ -20,15 +20,16 @@ type Expense = {
 };
 
 export default function Index() {
-  const params = useLocalSearchParams();
-
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expensesLoaded, setExpensesLoaded] = useState(false);
+
   const [dailyLimit, setDailyLimit] = useState(0);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [savings, setSavings] = useState(0);
-  const [currency, setCurrency] = useState("PHP");
 
-  // Load saved expenses when the app opens
+  const [currency, setCurrency] = useState("PHP");
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
   useEffect(() => {
     const loadExpenses = async () => {
       try {
@@ -39,42 +40,62 @@ export default function Index() {
         }
       } catch (error) {
         console.log("Error loading expenses:", error);
+      } finally {
+        setExpensesLoaded(true);
       }
     };
 
     loadExpenses();
   }, []);
 
-  // Save expenses whenever they change
   useEffect(() => {
-    const saveExpenses = async () => {
+    const loadSettings = async () => {
       try {
-        await AsyncStorage.setItem("expenses", JSON.stringify(expenses));
+        const savedDailyLimit = await AsyncStorage.getItem("dailyLimit");
+        const savedCurrentBalance =
+          await AsyncStorage.getItem("currentBalance");
+        const savedSavings = await AsyncStorage.getItem("savings");
+
+        if (savedDailyLimit !== null) {
+          setDailyLimit(Number(savedDailyLimit));
+        }
+
+        if (savedCurrentBalance !== null) {
+          setCurrentBalance(Number(savedCurrentBalance));
+        }
+
+        if (savedSavings !== null) {
+          setSavings(Number(savedSavings));
+        }
       } catch (error) {
-        console.log("Error saving expenses:", error);
+        console.log("Error loading settings:", error);
+      } finally {
+        setSettingsLoaded(true);
       }
     };
 
-    saveExpenses();
-  }, [expenses]);
+    loadSettings();
+  }, []);
 
-  // Add new expense from Add Expense screen
   useEffect(() => {
-    if (params.name && params.amount) {
-      const newExpense: Expense = {
-        name: params.name as string,
-        amount: Number(params.amount),
-        date: new Date().toDateString(),
-      };
-
-      setExpenses((currentExpenses) => [...currentExpenses, newExpense]);
-
-      router.setParams({
-        name: undefined,
-        amount: undefined,
-      });
+    if (!settingsLoaded) {
+      return;
     }
-  }, [params.name, params.amount]);
+
+    const saveSettings = async () => {
+      try {
+        await AsyncStorage.setItem("dailyLimit", String(dailyLimit));
+
+        await AsyncStorage.setItem("currentBalance", String(currentBalance));
+
+        await AsyncStorage.setItem("savings", String(savings));
+      } catch (error) {
+        console.log("Error saving settings:", error);
+      }
+    };
+
+    saveSettings();
+  }, [dailyLimit, currentBalance, savings, settingsLoaded]);
 
   const deleteExpense = (indexToDelete: number) => {
     setExpenses((currentExpenses) =>

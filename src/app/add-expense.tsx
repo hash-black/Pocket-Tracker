@@ -1,10 +1,48 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
+type Expense = {
+  name: string;
+  amount: number;
+  date: string;
+};
+
 export default function AddExpense() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+
+  const saveExpense = async () => {
+    if (!description || !amount) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const newExpense: Expense = {
+      name: description,
+      amount: Number(amount),
+      date: new Date().toDateString(),
+    };
+
+    try {
+      const savedExpenses = await AsyncStorage.getItem("expenses");
+
+      const currentExpenses: Expense[] = savedExpenses
+        ? JSON.parse(savedExpenses)
+        : [];
+
+      const updatedExpenses = [...currentExpenses, newExpense];
+
+      await AsyncStorage.setItem("expenses", JSON.stringify(updatedExpenses));
+
+      router.replace("/");
+    } catch (error) {
+      console.log("Error saving expense:", error);
+      alert("Something went wrong while saving the expense.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Expense</Text>
@@ -13,7 +51,7 @@ export default function AddExpense() {
 
       <TextInput
         style={styles.input}
-        placeholder="Example: Lunch"
+        placeholder="Whut ya baught"
         value={description}
         onChangeText={setDescription}
       />
@@ -28,23 +66,7 @@ export default function AddExpense() {
         onChangeText={setAmount}
       />
 
-      <Pressable
-        style={styles.saveButton}
-        onPress={() => {
-          if (!description || !amount) {
-            alert("Please fill in all fields.");
-            return;
-          }
-
-          router.replace({
-            pathname: "/",
-            params: {
-              name: description,
-              amount: amount,
-            },
-          });
-        }}
-      >
+      <Pressable style={styles.saveButton} onPress={saveExpense}>
         <Text style={styles.saveButtonText}>Save Expense</Text>
       </Pressable>
     </View>
