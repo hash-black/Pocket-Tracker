@@ -14,6 +14,7 @@ export default function Index() {
   const [expenses, setExpenses] = useState<{ name: string; amount: number }[]>(
     [],
   );
+  const [dailyLimit, setDailyLimit] = useState(0);
   useEffect(() => {
     if (params.name && params.amount) {
       setExpenses((currentExpenses) => [
@@ -35,18 +36,17 @@ export default function Index() {
     (total, expense) => total + expense.amount,
     0,
   );
+  const todaySpent = totalExpenses;
+  const remainingDailyLimit = Math.max(0, dailyLimit - todaySpent);
 
   const [currentBalance, setCurrentBalance] = useState(0);
   const [savings, setSavings] = useState(0);
   const [currency, setCurrency] = useState("PHP");
-  const [dailyLimit, setDailyLimit] = useState(0);
   const exchangeRate = 0.0159162;
   const convertAmount = (amount: number) => {
     if (currency === "USD") {
       return amount * exchangeRate;
     }
-    const todaySpent = totalExpenses;
-    const remainingDailyLimit = Math.max(0, dailyLimit - todaySpent);
 
     return amount;
   };
