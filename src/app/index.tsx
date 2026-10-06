@@ -127,6 +127,25 @@ export default function Index() {
         <Text style={styles.addButtonText}>+ Add Expense</Text>
       </Pressable>
 
+      <View style={styles.dailyLimitCard}>
+        <Text style={styles.dailyLimitTitle}>Daily Spending</Text>
+
+        <Text style={styles.dailyLimitText}>
+          Limit: {currency === "PHP" ? "₱" : "$"}
+          {convertAmount(dailyLimit).toFixed(2)}
+        </Text>
+
+        <Text style={styles.dailyLimitText}>
+          Spent: {currency === "PHP" ? "₱" : "$"}
+          {convertAmount(todaySpent).toFixed(2)}
+        </Text>
+
+        <Text style={styles.dailyLimitText}>
+          Remaining: {currency === "PHP" ? "₱" : "$"}
+          {convertAmount(remainingDailyLimit).toFixed(2)}
+        </Text>
+      </View>
+
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
       <View style={styles.transactionList}>
