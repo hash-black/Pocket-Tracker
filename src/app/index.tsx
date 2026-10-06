@@ -144,6 +144,11 @@ export default function Index() {
           Remaining: {currency === "PHP" ? "₱" : "$"}
           {convertAmount(remainingDailyLimit).toFixed(2)}
         </Text>
+        {dailyLimit > 0 && todaySpent > dailyLimit && (
+          <Text style={styles.warningText}>
+            ⚠️ Daily spending limit exceeded!
+          </Text>
+        )}
       </View>
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
@@ -179,6 +184,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 60,
+  },
+
+  warningText: {
+    marginTop: 10,
+    fontWeight: "bold",
   },
 
   transactionList: {
