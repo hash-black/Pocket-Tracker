@@ -314,4 +314,21 @@ const styles = StyleSheet.create({
   currencyButtonText: {
     fontSize: 16,
   },
+  dailyLimitCard: {
+    marginTop: 20,
+    padding: 18,
+    borderRadius: 15,
+    backgroundColor: "#eeeeee",
+  },
+
+  dailyLimitTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
+  dailyLimitText: {
+    fontSize: 15,
+    marginTop: 5,
+  },
 });
