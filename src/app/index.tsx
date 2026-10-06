@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   expense: {
     fontSize: 20,
     fontWeight: "bold",
-    marginTop: 5,
+    marginTop: 7,
   },
 
   sectionTitle: {
