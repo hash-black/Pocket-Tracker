@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   const params = useLocalSearchParams();
@@ -18,15 +18,23 @@ export default function Index() {
       amount: 250,
     },
   ]);
-  if (params.name && params.amount) {
-    setExpenses((currentExpenses) => [
-      ...currentExpenses,
-      {
-        name: params.name as string,
-        amount: Number(params.amount),
-      },
-    ]);
-  }
+  useEffect(() => {
+    if (params.name && params.amount) {
+      setExpenses((currentExpenses) => [
+        ...currentExpenses,
+        {
+          name: params.name as string,
+          amount: Number(params.amount),
+        },
+      ]);
+    }
+  }, [params.name, params.amount]);
+
+  const deleteExpense = (indexToDelete: number) => {
+    setExpenses((currentExpenses) =>
+      currentExpenses.filter((_, index) => index !== indexToDelete),
+    );
+  };
   const totalExpenses = expenses.reduce(
     (total, expense) => total + expense.amount,
     0,
@@ -65,13 +73,21 @@ export default function Index() {
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
-      {expenses.map((expense, index) => (
-        <View style={styles.transaction} key={index}>
-          <Text style={styles.transactionName}>{expense.name}</Text>
+      <ScrollView style={styles.transactionList}>
+        {expenses.map((expense, index) => (
+          <View style={styles.transaction} key={index}>
+            <View>
+              <Text style={styles.transactionName}>{expense.name}</Text>
 
-          <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
-        </View>
-      ))}
+              <Pressable onPress={() => deleteExpense(index)}>
+                <Text style={styles.deleteText}>Delete</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -81,6 +97,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 60,
+  },
+
+  transactionList: {
+    flex: 1,
   },
 
   title: {
@@ -174,6 +194,11 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  deleteText: {
+    marginTop: 5,
+    fontSize: 13,
     fontWeight: "bold",
   },
 });
