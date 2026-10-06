@@ -1,23 +1,19 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function Index() {
   const params = useLocalSearchParams();
-  const [expenses, setExpenses] = useState([
-    {
-      name: "Lunch",
-      amount: 100,
-    },
-    {
-      name: "Fare",
-      amount: 40,
-    },
-    {
-      name: "School Supplies",
-      amount: 250,
-    },
-  ]);
+  const [expenses, setExpenses] = useState<{ name: string; amount: number }[]>(
+    [],
+  );
   useEffect(() => {
     if (params.name && params.amount) {
       setExpenses((currentExpenses) => [
@@ -39,23 +35,24 @@ export default function Index() {
     (total, expense) => total + expense.amount,
     0,
   );
-  const totalIncome = 1000;
-  const balance = totalIncome - totalExpenses;
+  const [currentBalance, setCurrentBalance] = useState(0);
+  const [savings, setSavings] = useState(0);
+  const balanceAfterSavings = currentBalance - savings - totalExpenses;
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>PocketTrack</Text>
 
       <Text style={styles.subtitle}>Know where your money goes.</Text>
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text style={styles.balance}>₱{balance}.00</Text>
+        <Text style={styles.balance}>₱{balanceAfterSavings}.00</Text>
       </View>
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>Income</Text>
-          <Text style={styles.income}>₱{totalIncome}.00</Text>
+          <Text style={styles.summaryLabel}>Savings</Text>
+          <Text style={styles.income}>₱{savings}.00</Text>
         </View>
 
         <View style={styles.summaryCard}>
@@ -63,6 +60,24 @@ export default function Index() {
           <Text style={styles.expense}>₱{totalExpenses}</Text>
         </View>
       </View>
+
+      <Text style={styles.inputLabel}>Current Money</Text>
+
+      <TextInput
+        style={styles.moneyInput}
+        keyboardType="numeric"
+        value={String(currentBalance)}
+        onChangeText={(text) => setCurrentBalance(Number(text) || 0)}
+      />
+
+      <Text style={styles.inputLabel}>Savings Goal</Text>
+
+      <TextInput
+        style={styles.moneyInput}
+        keyboardType="numeric"
+        value={String(savings)}
+        onChangeText={(text) => setSavings(Number(text) || 0)}
+      />
 
       <Pressable
         style={styles.addButton}
@@ -73,22 +88,26 @@ export default function Index() {
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
-      <ScrollView style={styles.transactionList}>
-        {expenses.map((expense, index) => (
-          <View style={styles.transaction} key={index}>
-            <View>
-              <Text style={styles.transactionName}>{expense.name}</Text>
+      <View style={styles.transactionList}>
+        {expenses.length === 0 ? (
+          <Text style={styles.emptyText}>No transactions yet.</Text>
+        ) : (
+          expenses.map((expense, index) => (
+            <View style={styles.transaction} key={index}>
+              <View>
+                <Text style={styles.transactionName}>{expense.name}</Text>
 
-              <Pressable onPress={() => deleteExpense(index)}>
-                <Text style={styles.deleteText}>Delete</Text>
-              </Pressable>
+                <Pressable onPress={() => deleteExpense(index)}>
+                  <Text style={styles.deleteText}>Delete</Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
             </View>
-
-            <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+          ))
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -100,7 +119,7 @@ const styles = StyleSheet.create({
   },
 
   transactionList: {
-    flex: 1,
+    marginBottom: 20,
   },
 
   title: {
@@ -135,6 +154,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     marginTop: 15,
+  },
+
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
   },
 
   summaryCard: {
@@ -200,5 +225,20 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 13,
     fontWeight: "bold",
+  },
+
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginTop: 15,
+    marginBottom: 5,
+  },
+
+  moneyInput: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
   },
 });
