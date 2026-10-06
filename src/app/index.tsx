@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   },
 
   balanceLabel: {
-    fontSize: 14,
+    fontSize: 16,
   },
 
   balance: {
