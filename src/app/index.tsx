@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -12,28 +13,66 @@ import {
 import CurrencySelector from "@/components/CurrencySelector";
 import DailyLimit from "@/components/DailyLimit";
 
+type Expense = {
+  name: string;
+  amount: number;
+  date: string;
+};
+
 export default function Index() {
   const params = useLocalSearchParams();
 
-  const [expenses, setExpenses] = useState<
-    { name: string; amount: number; date: string }[]
-  >([]);
-
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [dailyLimit, setDailyLimit] = useState(0);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [savings, setSavings] = useState(0);
   const [currency, setCurrency] = useState("PHP");
 
+  // Load saved expenses when the app opens
+  useEffect(() => {
+    const loadExpenses = async () => {
+      try {
+        const savedExpenses = await AsyncStorage.getItem("expenses");
+
+        if (savedExpenses) {
+          setExpenses(JSON.parse(savedExpenses));
+        }
+      } catch (error) {
+        console.log("Error loading expenses:", error);
+      }
+    };
+
+    loadExpenses();
+  }, []);
+
+  // Save expenses whenever they change
+  useEffect(() => {
+    const saveExpenses = async () => {
+      try {
+        await AsyncStorage.setItem("expenses", JSON.stringify(expenses));
+      } catch (error) {
+        console.log("Error saving expenses:", error);
+      }
+    };
+
+    saveExpenses();
+  }, [expenses]);
+
+  // Add new expense from Add Expense screen
   useEffect(() => {
     if (params.name && params.amount) {
-      setExpenses((currentExpenses) => [
-        ...currentExpenses,
-        {
-          name: params.name as string,
-          amount: Number(params.amount),
-          date: new Date().toDateString(),
-        },
-      ]);
+      const newExpense: Expense = {
+        name: params.name as string,
+        amount: Number(params.amount),
+        date: new Date().toDateString(),
+      };
+
+      setExpenses((currentExpenses) => [...currentExpenses, newExpense]);
+
+      router.setParams({
+        name: undefined,
+        amount: undefined,
+      });
     }
   }, [params.name, params.amount]);
 
@@ -48,7 +87,12 @@ export default function Index() {
     0,
   );
 
-  const todaySpent = totalExpenses;
+  // Only count expenses made today
+  const today = new Date().toDateString();
+
+  const todaySpent = expenses
+    .filter((expense) => expense.date === today)
+    .reduce((total, expense) => total + expense.amount, 0);
 
   const remainingDailyLimit = Math.max(0, dailyLimit - todaySpent);
 
@@ -70,8 +114,6 @@ export default function Index() {
 
       <Text style={styles.subtitle}>Know where your money goes.</Text>
 
-      {/* Current Balance */}
-
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
 
@@ -80,8 +122,6 @@ export default function Index() {
           {convertAmount(balanceAfterSavings).toFixed(2)}
         </Text>
       </View>
-
-      {/* Summary */}
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryCard}>
@@ -103,11 +143,7 @@ export default function Index() {
         </View>
       </View>
 
-      {/* Currency Selector */}
-
       <CurrencySelector currency={currency} onChangeCurrency={setCurrency} />
-
-      {/* Current Money */}
 
       <Text style={styles.inputLabel}>Current Money</Text>
 
@@ -118,8 +154,6 @@ export default function Index() {
         onChangeText={(text) => setCurrentBalance(Number(text) || 0)}
       />
 
-      {/* Savings */}
-
       <Text style={styles.inputLabel}>Savings Goal</Text>
 
       <TextInput
@@ -128,8 +162,6 @@ export default function Index() {
         value={String(savings)}
         onChangeText={(text) => setSavings(Number(text) || 0)}
       />
-
-      {/* Daily Limit Component */}
 
       <DailyLimit
         dailyLimit={dailyLimit}
@@ -140,8 +172,6 @@ export default function Index() {
         convertAmount={convertAmount}
       />
 
-      {/* Add Expense */}
-
       <Pressable
         style={styles.addButton}
         onPress={() => router.push("/add-expense")}
@@ -149,7 +179,12 @@ export default function Index() {
         <Text style={styles.addButtonText}>+ Add Expense</Text>
       </Pressable>
 
-      {/* Recent Transactions */}
+      <Pressable
+        style={styles.historyButton}
+        onPress={() => router.push("/history")}
+      >
+        <Text style={styles.historyButtonText}>View History</Text>
+      </Pressable>
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
 
@@ -267,6 +302,20 @@ const styles = StyleSheet.create({
 
   addButtonText: {
     color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  historyButton: {
+    marginTop: 10,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#222222",
+    alignItems: "center",
+  },
+
+  historyButtonText: {
     fontSize: 16,
     fontWeight: "bold",
   },
