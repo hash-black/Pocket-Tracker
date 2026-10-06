@@ -35,8 +35,21 @@ export default function Index() {
     (total, expense) => total + expense.amount,
     0,
   );
+
   const [currentBalance, setCurrentBalance] = useState(0);
   const [savings, setSavings] = useState(0);
+  const [currency, setCurrency] = useState("PHP");
+  const [dailyLimit, setDailyLimit] = useState(0);
+  const exchangeRate = 0.0159162;
+  const convertAmount = (amount: number) => {
+    if (currency === "USD") {
+      return amount * exchangeRate;
+    }
+    const todaySpent = totalExpenses;
+    const remainingDailyLimit = Math.max(0, dailyLimit - todaySpent);
+
+    return amount;
+  };
   const balanceAfterSavings = currentBalance - savings - totalExpenses;
   return (
     <ScrollView style={styles.container}>
@@ -46,21 +59,40 @@ export default function Index() {
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text style={styles.balance}>₱{balanceAfterSavings}.00</Text>
+        <Text style={styles.balance}>
+          {currency === "PHP" ? "₱" : "$"}
+          {convertAmount(balanceAfterSavings).toFixed(2)}
+        </Text>
       </View>
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Savings</Text>
-          <Text style={styles.income}>₱{savings}.00</Text>
+          <Text style={styles.income}>
+            {currency === "PHP" ? "₱" : "$"}
+            {convertAmount(savings).toFixed(2)}
+          </Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Expenses</Text>
-          <Text style={styles.expense}>₱{totalExpenses}</Text>
+          <Text style={styles.expense}>
+            {currency === "PHP" ? "₱" : "$"}
+            {convertAmount(totalExpenses).toFixed(2)}
+          </Text>
         </View>
       </View>
 
+      <Text style={styles.inputLabel}>Currency</Text>
+
+      <Pressable
+        style={styles.currencyButton}
+        onPress={() => setCurrency(currency === "PHP" ? "USD" : "PHP")}
+      >
+        <Text style={styles.currencyButtonText}>
+          {currency === "PHP" ? "₱ Philippine Peso" : "$ US Dollar"}
+        </Text>
+      </Pressable>
       <Text style={styles.inputLabel}>Current Money</Text>
 
       <TextInput
@@ -77,6 +109,15 @@ export default function Index() {
         keyboardType="numeric"
         value={String(savings)}
         onChangeText={(text) => setSavings(Number(text) || 0)}
+      />
+      <Text style={styles.inputLabel}>Daily Spending Limit</Text>
+
+      <TextInput
+        style={styles.moneyInput}
+        keyboardType="numeric"
+        placeholder="₱0.00"
+        value={String(dailyLimit)}
+        onChangeText={(text) => setDailyLimit(Number(text) || 0)}
       />
 
       <Pressable
@@ -102,7 +143,10 @@ export default function Index() {
                 </Pressable>
               </View>
 
-              <Text style={styles.transactionAmount}>-₱{expense.amount}</Text>
+              <Text style={styles.transactionAmount}>
+                -{currency === "PHP" ? "₱" : "$"}
+                {convertAmount(expense.amount).toFixed(2)}
+              </Text>
             </View>
           ))
         )}
@@ -239,6 +283,16 @@ const styles = StyleSheet.create({
     borderColor: "#cccccc",
     borderRadius: 10,
     padding: 12,
+    fontSize: 16,
+  },
+  currencyButton: {
+    borderWidth: 1,
+    borderColor: "#cccccc",
+    borderRadius: 10,
+    padding: 12,
+  },
+
+  currencyButtonText: {
     fontSize: 16,
   },
 });
