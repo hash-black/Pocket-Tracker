@@ -94,5 +94,9 @@ const styles = StyleSheet.create({
   warningText: {
     marginTop: 10,
     fontWeight: "bold",
+    backgroundColor: "#cd0e0e",
+    color: "white",
+    padding: 20,
+    borderRadius: 10,
   },
 });
