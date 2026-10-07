@@ -97,10 +97,18 @@ export default function Index() {
     saveSettings();
   }, [dailyLimit, currentBalance, savings, settingsLoaded]);
 
-  const deleteExpense = (indexToDelete: number) => {
-    setExpenses((currentExpenses) =>
-      currentExpenses.filter((_, index) => index !== indexToDelete),
+  const deleteExpense = async (indexToDelete: number) => {
+    const updatedExpenses = expenses.filter(
+      (_, index) => index !== indexToDelete,
     );
+
+    setExpenses(updatedExpenses);
+
+    try {
+      await AsyncStorage.setItem("expenses", JSON.stringify(updatedExpenses));
+    } catch (error) {
+      console.log("Error saving deleted expense:", error);
+    }
   };
 
   const totalExpenses = expenses.reduce(
