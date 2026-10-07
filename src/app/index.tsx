@@ -139,9 +139,9 @@ export default function Index() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>PocketTrack</Text>
+      <Text style={styles.title}>ROCKET POCKET</Text>
 
-      <Text style={styles.subtitle}>Know where your money goes.</Text>
+      <Text style={styles.subtitle}>Rock-et and Pock-et.</Text>
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
